@@ -15,15 +15,12 @@ final class AppMonitor {
     private var timer: DispatchSourceTimer?
     private let classifier = AppClassifier()
     private let queue = DispatchQueue(label: "com.digitalshadow.monitor", qos: .utility)
-    private var axObserver: AXObserver?
     private var lastFocusedApp: NSRunningApplication?
     private var lastWindowTitle: String?
 
     func start() {
         guard !isRunning else { return }
         isRunning = true
-
-        setupAXObserver()
 
         let nc = NSWorkspace.shared.notificationCenter
         nc.addObserver(self, selector: #selector(appDidActivate(_:)),
@@ -40,11 +37,6 @@ final class AppMonitor {
         timer?.cancel()
         timer = nil
         NSWorkspace.shared.notificationCenter.removeObserver(self)
-        if let obs = axObserver {
-            CFRunLoopRemoveSource(CFRunLoopGetCurrent(),
-                                  AXObserverGetRunLoopSource(obs), .defaultMode)
-            axObserver = nil
-        }
     }
 
     @objc private func appDidActivate(_ notification: Notification) {
@@ -53,23 +45,6 @@ final class AppMonitor {
         lastFocusedApp = app
         lastActiveTime = Date()
         queue.async { [weak self] in self?.recordCurrent() }
-    }
-
-    private func setupAXObserver() {
-        let callback: AXObserverCallback = { (observer, element, notification, refcon) in
-            guard let selfPtr = refcon else { return }
-            let monitor = Unmanaged<AppMonitor>.fromOpaque(selfPtr).takeUnretainedValue()
-            monitor.queue.async { monitor.handleAXChange() }
-        }
-        _ = Unmanaged.passUnretained(self).toOpaque()
-        guard AXObserverCreate(getpid(), callback, &axObserver) == .success,
-              let obs = axObserver else { return }
-        CFRunLoopAddSource(CFRunLoopGetCurrent(),
-                           AXObserverGetRunLoopSource(obs), .defaultMode)
-    }
-
-    private func handleAXChange() {
-        recordCurrent()
     }
 
     private func poll() {

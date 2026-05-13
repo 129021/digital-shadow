@@ -27,8 +27,8 @@ final class EventStoreTests: XCTestCase {
             url: "https://github.com/org/repo/pull/42",
             appCategory: .browser
         )
-        try store.insertEvent(event)
-        XCTAssertEqual(event.id, 1)
+        let id = try store.insertEvent(event)
+        XCTAssertEqual(id, 1)
     }
 
     func testQueryEventsInRange() throws {
@@ -58,8 +58,8 @@ final class EventStoreTests: XCTestCase {
             appGroup: ["Chrome", "VS Code"],
             title: "Code review"
         )
-        try store.insertSession(session)
-        XCTAssertEqual(session.id, 1)
+        let id = try store.insertSession(session)
+        XCTAssertEqual(id, 1)
     }
 
     func testQuerySessionsForDate() throws {

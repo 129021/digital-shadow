@@ -39,6 +39,7 @@ enum SummaryFrequency: String, Codable, CaseIterable {
 
 struct AppConfig: Codable {
     var llmProvider: LLMProvider = .openai
+    // TODO: Store API key in macOS Keychain instead of plaintext config
     var apiKey: String = ""
     var apiBaseURL: String = ""
     var modelName: String = "gpt-4o-mini"

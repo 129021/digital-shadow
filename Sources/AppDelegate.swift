@@ -28,7 +28,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Init core services
         configManager = ConfigManager(path: Constants.configPath.path)
-        dbManager = try! DatabaseManager(path: Constants.dbPath.path)
+        do {
+            dbManager = try DatabaseManager(path: Constants.dbPath.path)
+        } catch {
+            print("[DigitalShadow] Failed to open database: \(error)")
+            NSApp.terminate(nil)
+            return
+        }
         eventStore = EventStore(db: dbManager)
         logWriter = LogWriter()
         videoFetcher = VideoCaptionFetcher()

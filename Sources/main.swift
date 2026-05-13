@@ -1,6 +1,7 @@
 import AppKit
 
-// AppDelegate will be defined in Task 13
-// For now, this is a minimal placeholder
-print("DigitalShadow starting...")
-dispatchMain()
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.setActivationPolicy(.accessory)
+_ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)
